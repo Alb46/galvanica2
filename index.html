@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Corriente galvánica · Equipo y técnicas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--u:min(1vw,1.7778vh);
+  --bg:#faf7f2; --paper:#ffffff; --ink:#23201c; --muted:#6b645a; --line:#e7e0d5;
+  --plus:#c8323c; --plus-soft:#fbe7e8; --minus:#2b3a67; --minus-soft:#e5e9f5;
+  --accent:#b8860b; --ok:#2e7d4f; --ok-soft:#e3f3e9; --ko:#b3261e; --ko-soft:#fbe4e2;
+  --skin:#f3d2bd; --skin-deep:#e6b79b;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden}
+body{background:#2a2622;color:var(--ink);font-family:"DM Sans",system-ui,sans-serif;display:flex;flex-direction:column}
+/* stage */
+.viewport{position:fixed;inset:0}
+.stage{position:absolute;inset:0;container-type:size;background:var(--bg);overflow:hidden}
+.slide{position:absolute;inset:0;padding:calc(var(--u)*3.2) calc(var(--u)*5) calc(var(--u)*5.6);display:none;flex-direction:column;gap:calc(var(--u)*1.4);overflow:auto;font-size:calc(var(--u)*1.45);line-height:1.5}
+.slide.active{display:flex;animation:in .35s ease}
+@keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.slide h1,.slide h2,.slide h3{font-family:Fraunces,Georgia,serif;line-height:1.15;margin:0}
+.slide h1{font-size:calc(var(--u)*4.6)}
+.slide h2{font-size:calc(var(--u)*2.9)}
+.slide h3{font-size:calc(var(--u)*1.75)}
+.slide p{margin:0}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:calc(var(--u)*2)}
+.eyebrow{font-size:calc(var(--u)*1.05);letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:calc(var(--u)*.5)}
+.ra{font-size:calc(var(--u)*.95);font-weight:700;color:var(--muted);border:1px dashed #cfc6b8;border-radius:8px;padding:calc(var(--u)*.25) calc(var(--u)*.7);white-space:nowrap}
+.grow{flex:1;min-height:0}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:calc(var(--u)*1.2);padding:calc(var(--u)*1.6)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:calc(var(--u)*1.6)}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:calc(var(--u)*1.4)}
+.row{display:flex;flex-wrap:wrap;gap:calc(var(--u)*.9);align-items:center}
+.pill{display:inline-block;padding:calc(var(--u)*.1) calc(var(--u)*.8);border-radius:999px;font-weight:700;font-size:calc(var(--u)*1.1)}
+.p-plus{background:var(--plus-soft);color:var(--plus)} .p-minus{background:var(--minus-soft);color:var(--minus)}
+.key{background:#fff8e6;border-left:calc(var(--u)*.4) solid var(--accent);border-radius:var(--u);padding:calc(var(--u)*1.3) calc(var(--u)*1.8)}
+.key strong.t{display:block;font-size:var(--u);letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:calc(var(--u)*.4)}
+.key ul,.slide ul{margin:0;padding-left:calc(var(--u)*1.6)}
+.key li{margin:calc(var(--u)*.3) 0}
+.dark .key li{margin:calc(var(--u)*.7) 0}
+button{font:inherit;cursor:pointer}
+.btn{border:2px solid var(--ink);background:var(--ink);color:#fff;border-radius:999px;padding:calc(var(--u)*.6) calc(var(--u)*1.4);font-weight:700;font-size:calc(var(--u)*1.25)}
+.btn.ghost{background:transparent;color:var(--ink)}
+.btn:focus-visible,.term:focus-visible,.opt:focus-visible,.navb:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.term{border:none;background:none;padding:0;color:inherit;font-weight:700;border-bottom:2px dotted var(--accent);cursor:help;font-size:inherit}
+#pop{position:fixed;z-index:50;max-width:320px;background:var(--ink);color:#fff;padding:12px 14px;border-radius:12px;font-size:15px;line-height:1.45;box-shadow:0 10px 30px rgba(0,0,0,.3);display:none}
+#pop b{color:#ffd77a}
+.chip{background:var(--paper);border:1px solid var(--line);border-radius:calc(var(--u)*1.2);padding:calc(var(--u)*1.4);text-align:center}
+.chip .big{font-family:Fraunces,serif;font-size:calc(var(--u)*3.6);font-weight:700;line-height:1.1}
+.chip small{display:block;color:var(--muted);font-size:calc(var(--u)*1.15)}
+.eq{font-family:ui-monospace,Menlo,monospace;background:rgba(255,255,255,.75);border-radius:calc(var(--u)*.6);padding:calc(var(--u)*.3) calc(var(--u)*.8);display:inline-block;margin:calc(var(--u)*.2) 0;font-size:calc(var(--u)*1.3)}
+/* cover */
+.cover{background:radial-gradient(circle at 85% 15%,var(--plus-soft) 0,transparent 42%),radial-gradient(circle at 8% 95%,var(--minus-soft) 0,transparent 48%),var(--bg);justify-content:center}
+.dark{background:#23201c;color:#f3ede4}
+.dark .key{background:#36302a;color:#f3ede4}
+/* sim */
+.sim-svg{width:100%;height:auto;max-height:52cqh;display:block;border-radius:var(--u);background:#eef5f8}
+.react{border-radius:calc(var(--u)*1.2);padding:calc(var(--u)*1.6);border:3px solid transparent;transition:.3s}
+.react.plus{background:var(--plus-soft)} .react.minus{background:var(--minus-soft)}
+.react.on.plus{border-color:var(--plus)} .react.on.minus{border-color:var(--minus)}
+.ph{height:calc(var(--u)*1.1);border-radius:calc(var(--u)*.6);background:linear-gradient(90deg,#e8434a,#f5a623,#f2e14c,#7ac943,#3fa7d6,#3b5bdb,#6a3fbf);position:relative;margin:calc(var(--u)*.8) 0 calc(var(--u)*.2)}
+.ph i{position:absolute;top:calc(var(--u)*-.45);width:calc(var(--u)*.5);height:calc(var(--u)*2);background:var(--ink);border-radius:3px;transition:left .6s}
+.ph-l{display:flex;justify-content:space-between;font-size:var(--u);color:var(--muted)}
+/* classify */
+.cls{display:grid;grid-template-columns:repeat(4,1fr);gap:calc(var(--u)*.9)}
+.cl{background:var(--paper);border:1.5px solid var(--line);border-radius:var(--u);padding:calc(var(--u)*.9) calc(var(--u)*1.1);font-size:calc(var(--u)*1.4);line-height:1.35;transition:.25s;text-align:left;color:var(--ink)}
+.cl p{margin:0 0 calc(var(--u)*.6);font-weight:500}
+.cl .row{gap:calc(var(--u)*.5)}
+.cl .row button{flex:1;border-radius:calc(var(--u)*.7);padding:calc(var(--u)*.5);border:1.5px solid var(--line);background:#fff;font-weight:700;font-size:calc(var(--u)*1.3)}
+.cl .row button.a{color:var(--plus)} .cl .row button.c{color:var(--minus)}
+.cl.right{background:var(--ok-soft);border-color:var(--ok)}
+.cl.wrong{background:var(--ko-soft);border-color:var(--ko)}
+.cl small{display:block;font-size:calc(var(--u)*1.25)}
+table.cmp{width:100%;border-collapse:collapse;font-size:calc(var(--u)*1.85)}
+table.cmp th,table.cmp td{padding:calc(var(--u)*.85) calc(var(--u)*1.2);border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+table.cmp th{font-family:Fraunces,serif;font-size:calc(var(--u)*2.3)}
+table.cmp th:nth-child(2){color:var(--plus)} table.cmp th:nth-child(3){color:var(--minus)}
+/* density */
+input[type=range]{width:100%;accent-color:var(--ink)}
+.ctrl label{display:flex;justify-content:space-between;font-weight:700;font-size:calc(var(--u)*1.55)}
+.ctrl{margin-bottom:var(--u)}
+.dens-vis{display:flex;align-items:center;justify-content:space-around;height:calc(var(--u)*21);background:linear-gradient(var(--skin),var(--skin-deep));border-radius:var(--u)}
+.elec{border-radius:calc(var(--u)*.8);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:var(--u);transition:.3s}
+.num-big{font-family:Fraunces,serif;font-size:calc(var(--u)*2.8);font-weight:700}
+.warn{background:var(--ko-soft);color:var(--ko);border-radius:calc(var(--u)*.8);padding:calc(var(--u)*.7) var(--u);font-weight:700;display:none;font-size:calc(var(--u)*1.2)}
+/* io */
+.io-svg{width:100%;height:auto;max-height:42cqh;display:block;border-radius:var(--u)}
+.seg{display:inline-flex;border:2px solid var(--ink);border-radius:999px;overflow:hidden}
+.seg button{border:none;background:transparent;padding:calc(var(--u)*.55) calc(var(--u)*1.3);font-weight:700;font-size:calc(var(--u)*1.45);color:var(--ink)}
+.seg button.sel{background:var(--ink);color:#fff}
+.fb{border-radius:calc(var(--u)*.9);padding:calc(var(--u)*.9) calc(var(--u)*1.3);font-weight:500}
+.fb.good{background:var(--ok-soft)} .fb.bad{background:var(--ko-soft)}
+/* body */
+.body-svg{height:68cqh;width:auto}
+.bigtxt{font-family:Fraunces,serif;font-size:calc(var(--u)*3.4);font-weight:700}
+/* quiz */
+.opt{display:block;width:100%;text-align:left;margin:calc(var(--u)*.7) 0;padding:calc(var(--u)*1.1) calc(var(--u)*1.5);border-radius:var(--u);border:2px solid var(--line);background:#fff;font-size:calc(var(--u)*1.75);color:var(--ink)}
+.opt:hover:not(:disabled){border-color:var(--ink)}
+.opt.right{background:var(--ok-soft);border-color:var(--ok)}
+.opt.wrong{background:var(--ko-soft);border-color:var(--ko)}
+.qbar{height:calc(var(--u)*.6);background:var(--line);border-radius:calc(var(--u)*.3);overflow:hidden}
+.qbar i{display:block;height:100%;background:var(--accent);width:0;transition:.4s}
+.zone{cursor:pointer;transition:.2s}
+.zone:hover ellipse,.zone:hover rect,.zone.sel ellipse,.zone.sel rect{opacity:.6}
+.zone:focus-visible{outline:3px solid var(--accent)}
+.pi{display:flex;align-items:center;gap:calc(var(--u)*.8);background:var(--paper);border:1.5px solid var(--line);border-radius:calc(var(--u)*.9);padding:calc(var(--u)*.75) var(--u);font-size:calc(var(--u)*1.4);line-height:1.3}
+.pi small{font-size:calc(var(--u)*1.15)}
+.pi span{flex:1}
+.pi button{border-radius:calc(var(--u)*.6);padding:calc(var(--u)*.45) calc(var(--u)*.8);border:1.5px solid var(--line);background:#fff;font-weight:700;font-size:calc(var(--u)*1.2);color:var(--ink)}
+.pi.right{background:var(--ok-soft);border-color:var(--ok)} .pi.wrong{background:var(--ko-soft);border-color:var(--ko)}
+table.cmp td.hid{cursor:pointer;position:relative;color:transparent}
+table.cmp td.hid *{visibility:hidden}
+table.cmp td.hid::after{content:"¿?  toca para ver";position:absolute;inset:calc(var(--u)*.35) calc(var(--u)*.4);border-radius:calc(var(--u)*.6);background:#efe8dc;color:var(--muted);font-size:calc(var(--u)*1.2);font-weight:700;display:flex;align-items:center;padding-left:var(--u)}
+table.cmp td.hid:hover::after{background:#e5dccd}
+table.cmp td.shown{animation:in .3s ease;background:#fff8e6}
+/* nav bar */
+.nav{position:fixed;z-index:30;left:calc(var(--u)*1.2);bottom:calc(var(--u)*1);display:flex;align-items:center;gap:calc(var(--u)*.4);background:rgba(35,32,28,.7);color:#f3ede4;border-radius:999px;padding:calc(var(--u)*.3);font-size:calc(var(--u)*.95);backdrop-filter:blur(4px)}
+.navb{border:none;background:#4a433b;color:#f3ede4;border-radius:50%;width:calc(var(--u)*1.9);height:calc(var(--u)*1.9);font-size:calc(var(--u)*1);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+.navb:hover:not(:disabled){background:#ffd77a;color:#23201c}
+.navb:disabled{opacity:.35;cursor:default}
+.dots{display:none}
+.dot{width:calc(var(--u)*.7);height:calc(var(--u)*.7);border-radius:50%;background:#7a7066;border:none;padding:0;cursor:pointer}
+.dot.on{background:#ffd77a;transform:scale(1.25)}
+#counter{min-width:calc(var(--u)*3.4);text-align:center;font-variant-numeric:tabular-nums;font-weight:700}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+/* ---- parte 2 ---- */
+.device{background:#2f2a25;border-radius:calc(var(--u)*1.4);padding:calc(var(--u)*1.6);display:flex;flex-direction:column;justify-content:space-evenly;gap:calc(var(--u)*1.6);box-shadow:inset 0 0 0 3px #4a433b}
+.dev-top,.dev-bot{display:flex;gap:var(--u);justify-content:space-around;flex-wrap:wrap}
+.hot{background:#3a342e;border:2px solid #5a5249;color:#f3ede4;border-radius:var(--u);padding:var(--u);display:flex;flex-direction:column;align-items:center;gap:calc(var(--u)*.6);font-size:calc(var(--u)*1.35);font-weight:700;min-width:calc(var(--u)*8.5);transition:.2s}
+.hot:hover,.hot.sel{border-color:#ffd77a;background:#4a4239}
+.sw{width:calc(var(--u)*3);height:calc(var(--u)*4.4);border-radius:calc(var(--u)*.5);background:linear-gradient(#6b645a 50%,#2e7d4f 50%)}
+.lcd{background:#cfe3c4;color:#1d3a1d;font-family:ui-monospace,Menlo,monospace;font-size:calc(var(--u)*1.8);font-weight:700;padding:calc(var(--u)*.4) var(--u);border-radius:calc(var(--u)*.5);min-width:calc(var(--u)*9);text-align:center}
+.lcd.big{font-size:calc(var(--u)*3);min-width:calc(var(--u)*18)}
+.lcd small{font-size:var(--u)}
+.tog{background:#1f1b18;color:#ffd77a;border-radius:calc(var(--u)*.5);padding:calc(var(--u)*.4) calc(var(--u)*.8);font-size:calc(var(--u)*1.3)}
+.knob{width:calc(var(--u)*6.5);height:calc(var(--u)*6.5);border-radius:50%;background:radial-gradient(circle at 35% 35%,#9a9187,#4a433b);box-shadow:0 0 0 calc(var(--u)*.3) #1f1b18;position:relative}
+.knob::after{content:"";position:absolute;left:50%;top:calc(var(--u)*.4);width:calc(var(--u)*.35);height:calc(var(--u)*1.6);background:#ffd77a;transform:translateX(-50%);border-radius:calc(var(--u)*.2)}
+.plugs{display:flex;gap:calc(var(--u)*.6)}.plugs i{width:calc(var(--u)*1.8);height:calc(var(--u)*1.8);border-radius:50%;box-shadow:0 0 0 calc(var(--u)*.3) #1f1b18;display:block}
+.dbtn{background:#3a342e;border:2px solid #5a5249;color:#f3ede4;border-radius:999px;padding:calc(var(--u)*.6) calc(var(--u)*1.3);font-weight:700;font-size:calc(var(--u)*1.3)}
+.dbtn.on{background:#2e7d4f;border-color:#2e7d4f}
+.dbtn:focus-visible{outline:3px solid #ffd77a}
+.device input[type=range]{accent-color:#ffd77a}
+.checks{list-style:none;padding:0!important;margin:0}
+.checks li{padding:calc(var(--u)*.5) 0;border-bottom:1px solid var(--line);color:var(--muted)}
+.checks li.ok{color:var(--ok);font-weight:700}
+.checks li::before{content:"○ ";} .checks li.ok::before{content:"✔ ";}
+.flips{display:grid;grid-template-columns:repeat(4,1fr);gap:calc(var(--u)*1.1)}
+.flip{perspective:800px;border:none;background:none;padding:0;min-height:calc(var(--u)*11)}
+.flip .in{position:relative;width:100%;height:100%;transition:transform .5s;transform-style:preserve-3d}
+.flip.on .in{transform:rotateY(180deg)}
+.flip .f,.flip .b{position:absolute;inset:0;backface-visibility:hidden;border-radius:var(--u);padding:var(--u);display:flex;align-items:center;justify-content:center;text-align:center}
+.flip .f{background:var(--paper);border:1.5px solid var(--line);font-family:Fraunces,serif;font-weight:700;font-size:calc(var(--u)*1.7);color:var(--ink)}
+.flip .b{background:#fff8e6;border:1.5px solid var(--accent);transform:rotateY(180deg);font-size:calc(var(--u)*1.3);line-height:1.35;color:var(--ink)}
+.mapcol{display:flex;flex-direction:column;gap:calc(var(--u)*.8)}
+.maph{border-radius:var(--u);padding:var(--u);text-align:center;font-size:calc(var(--u)*1.5);color:var(--plus)}
+.maph small{font-size:calc(var(--u)*1.1);color:var(--muted)}
+.mapb{border:1.5px solid var(--line);background:#fff;border-radius:var(--u);padding:var(--u);font-weight:700;font-size:calc(var(--u)*1.45);text-align:left;color:var(--ink)}
+.mapb:hover,.mapb.sel{border-color:var(--ink);background:#fff8e6}
+.route{cursor:pointer}.route:hover,.route.sel{filter:drop-shadow(0 0 6px #ffd77a)}
+.checkgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--u);align-content:start}
+.ck{border:2px solid var(--line);background:#fff;border-radius:var(--u);padding:calc(var(--u)*1.1);font-size:calc(var(--u)*1.45);text-align:left;color:var(--ink);display:flex;gap:calc(var(--u)*.8);align-items:flex-start}
+.ck::before{content:"☐";font-size:calc(var(--u)*1.6);line-height:1}
+.ck.on{border-color:var(--ink);background:#fff8e6}.ck.on::before{content:"☑"}
+.ck.good{background:var(--ok-soft);border-color:var(--ok)}.ck.bad{background:var(--ko-soft);border-color:var(--ko)}.ck.miss{border-style:dashed;border-color:var(--ko)}
+.step{border:1.5px solid var(--line);background:#fff;border-radius:calc(var(--u)*.9);padding:calc(var(--u)*.7) var(--u);font-size:calc(var(--u)*1.3);text-align:left;color:var(--ink);line-height:1.3}
+.step:hover{border-color:var(--ink)}
+.step.shake{animation:shake .35s;border-color:var(--ko);background:var(--ko-soft)}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.tl{display:flex;height:calc(var(--u)*6);border-radius:var(--u);overflow:hidden;font-weight:700;color:#fff;font-size:calc(var(--u)*1.3)}
+.tl div{display:flex;align-items:center;justify-content:center;border-right:2px solid #fff}
+.tlcur{position:absolute;top:calc(var(--u)*-.6);bottom:calc(var(--u)*-.6);width:calc(var(--u)*.4);background:#ffd77a;left:0;border-radius:calc(var(--u)*.2);box-shadow:0 0 0 2px #23201c;display:none}
+.scn{background:var(--paper);border:1.5px solid var(--line);border-radius:var(--u);padding:calc(var(--u)*1.1) calc(var(--u)*1.4);display:flex;gap:var(--u);align-items:center;font-size:calc(var(--u)*1.6)}
+.scn span{flex:1}
+.scn button{border-radius:calc(var(--u)*.7);padding:calc(var(--u)*.55) calc(var(--u)*1.1);border:1.5px solid var(--line);background:#fff;font-weight:700;font-size:calc(var(--u)*1.35);color:var(--ink)}
+.scn.right{background:var(--ok-soft);border-color:var(--ok)}.scn.wrong{background:var(--ko-soft);border-color:var(--ko)}
+.scn small{font-size:calc(var(--u)*1.35)}
+#tb5 th,#tb5 td{padding:calc(var(--u)*.55) var(--u)}
+#tb5 th{font-size:calc(var(--u)*1.7)}
+table.rv td.hid{cursor:pointer;position:relative;color:transparent}
+table.rv td.hid::after{content:"¿?";position:absolute;inset:calc(var(--u)*.3) calc(var(--u)*.4);border-radius:calc(var(--u)*.6);background:#efe8dc;color:var(--muted);font-size:calc(var(--u)*1.2);font-weight:700;display:flex;align-items:center;padding-left:var(--u)}
+table.rv td.shown{background:#fff8e6}
+
+</style>
+</head>
+<body>
+<div class="viewport"><div class="stage" id="stage">
+
+<!-- 1 Portada -->
+<section class="slide cover" data-title="Portada">
+  <div class="eyebrow">Aparatología estética · Tema 3 · Apartados 4-7</div>
+  <h1>La corriente galvánica:<br>el equipo y las técnicas</h1>
+  <p style="font-size:calc(var(--u)*1.7);max-width:calc(var(--u)*62);color:#3b362f;margin-top:var(--u)">Conoce el aparato, sus parámetros y cómo se aplica cada técnica. Toca las palabras <button class="term" data-t="ejemplo">subrayadas así</button> para ver su significado.</p>
+  <p style="color:var(--muted);font-size:calc(var(--u)*1.2);margin-top:calc(var(--u)*2)">Avanza con las flechas ← → del teclado o con los botones de abajo.</p>
+</section>
+
+<!-- 2 Equipo -->
+<section class="slide" data-title="El equipo">
+  <div class="top"><div><div class="eyebrow">4 · El equipo</div><h2>Conoce el aparato</h2></div><span class="ra">RA2 · b) · RA3 · b)</span></div>
+  <p style="font-size:calc(var(--u)*1.6)">Tiene un dispositivo central que controla las variables y un generador que transforma la corriente de la red en continua. Toca cada mando.</p>
+  <div style="display:grid;grid-template-columns:1.25fr 1fr;gap:calc(var(--u)*2)" class="grow">
+    <div class="device">
+      <div class="dev-top">
+        <button class="hot" data-p="power"><span class="sw"></span>Encendido</button>
+        <button class="hot" data-p="meter"><span class="lcd">0,0 <small>mA</small></span>Miliamperímetro</button>
+        <button class="hot" data-p="inv"><span class="tog">+ ⇄ −</span>Inversor</button>
+        <button class="hot" data-p="micro"><span class="tog">µ ÷10</span>Microgalvánica</button>
+      </div>
+      <div class="dev-bot">
+        <button class="hot" data-p="rheo"><span class="knob"></span>Reóstato</button>
+        <button class="hot" data-p="rheo"><span class="knob"></span>Reóstato</button>
+        <button class="hot" data-p="plugs"><span class="plugs"><i style="background:#c8323c"></i><i style="background:#23201c"></i><i style="background:#c8323c"></i><i style="background:#23201c"></i></span>Clavijas</button>
+      </div>
+    </div>
+    <div class="card" id="dev-info" style="font-size:calc(var(--u)*1.6);display:flex;flex-direction:column;justify-content:center"><p style="color:var(--muted)">Toca una parte del equipo para saber para qué sirve.</p></div>
+  </div>
+</section>
+
+<!-- 3 Prueba el equipo -->
+<section class="slide" data-title="Prueba el equipo: siempre a cero">
+  <div class="top"><div><div class="eyebrow">4 · El equipo</div><h2>Prueba el equipo: ¿trabajas con seguridad?</h2></div><span class="ra">RA3 · c) · RA6 · b)</span></div>
+  <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:calc(var(--u)*2)" class="grow">
+    <div class="device" style="gap:calc(var(--u)*1.2)">
+      <div class="row" style="justify-content:space-between">
+        <button class="dbtn" id="s-power">⏻ Encender</button>
+        <div class="lcd big" id="s-lcd">— — mA</div>
+      </div>
+      <div class="row">
+        <button class="dbtn" id="s-conn">🔌 Conectar electrodos</button>
+        <button class="dbtn" id="s-inv">⇄ Inversor</button>
+        <button class="dbtn" id="s-micro">µ Microgalvánica: NO</button>
+      </div>
+      <div><label style="display:flex;justify-content:space-between;font-weight:700;font-size:calc(var(--u)*1.4);color:#f3ede4">Reóstato (intensidad) <span id="s-val">0 mA</span></label>
+        <input type="range" id="s-rheo" min="0" max="10" step="0.5" value="0" disabled></div>
+      <div id="s-msg" class="fb" style="font-size:calc(var(--u)*1.4);background:#3a342e;color:#f3ede4">Enciende el equipo para empezar.</div>
+    </div>
+    <div class="card" style="font-size:calc(var(--u)*1.45)">
+      <h3 style="margin-bottom:calc(var(--u)*.6)">Buenas prácticas conseguidas <span id="s-score" style="color:var(--accent)"></span></h3>
+      <ul class="checks" id="s-checks"></ul>
+      <button class="btn ghost" id="s-reset" style="margin-top:var(--u);font-size:calc(var(--u)*1.15)">↺ Reiniciar</button>
+    </div>
+  </div>
+</section>
+
+<!-- 4 Accesorios -->
+<section class="slide" data-title="Electrodos y accesorios">
+  <div class="top"><div><div class="eyebrow">4 · El equipo</div><h2>Electrodos y accesorios</h2></div><span class="ra">RA3 · b), d)</span></div>
+  <p style="font-size:calc(var(--u)*1.6)">¿Sabes para qué sirve cada uno? Piénsalo y toca la tarjeta para darle la vuelta.</p>
+  <div class="flips grow" id="flips"></div>
+  <div class="key" style="font-size:calc(var(--u)*1.45)"><strong class="t">Importante</strong>En las placas, <b>ninguna parte metálica debe tocar la piel</b>: van dentro de una funda o esponja humedecida en solución conductora.</div>
+</section>
+
+<!-- 5 Intensidades -->
+<section class="slide" data-title="Intensidades y tiempos">
+  <div class="top"><div><div class="eyebrow">5 · Parámetros</div><h2>Intensidades y tiempos orientativos</h2></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:calc(var(--u)*.4)"><span class="ra">RA3 · g) · RA4 · e)</span><div class="row"><b class="rv-count" style="font-size:calc(var(--u)*1.35)"></b><button class="btn rv-mode" style="font-size:calc(var(--u)*1.15);padding:calc(var(--u)*.4) calc(var(--u)*1.1)">🙈 Modo repaso</button><button class="btn ghost rv-all" style="font-size:calc(var(--u)*1.15);padding:calc(var(--u)*.4) calc(var(--u)*1.1);display:none">👁 Mostrar todo</button></div></div></div>
+  <table class="cmp rv" style="font-size:calc(var(--u)*1.3)" id="tb5">
+    <tr><th>Situación</th><th style="color:var(--ink)">Intensidad</th><th style="color:var(--ink)">Tiempo</th></tr>
+    <tr><td><b>Rango habitual en estética</b></td><td>0,25-10 mA</td><td>—</td></tr>
+    <tr><td><b>Electrodos pequeños</b></td><td>1-5 mA</td><td>—</td></tr>
+    <tr><td><b>Electrodos grandes</b></td><td>Hasta unos 12 mA (para más efecto, mejor alargar el tiempo)</td><td>—</td></tr>
+    <tr><td><b>Galvanización facial (máscara)</b></td><td>0,7 mA (pieles finas) - 1,5 mA (pieles resistentes)</td><td>7-15 min</td></tr>
+    <tr><td><b>Galvanización corporal (vendas)</b></td><td>Hasta unos 5 mA (menos de 10 mA)</td><td>Unos 30 min</td></tr>
+    <tr><td><b>Baño galvánico</b></td><td>15-20 mA (el agua actúa como un electrodo muy grande)</td><td>—</td></tr>
+    <tr><td><b>Iontoforesis</b></td><td>La que indique el fabricante del activo</td><td>Máximo 30 min</td></tr>
+    <tr><td><b>Desincrustación</b></td><td>Proporcional al tamaño del electrodo</td><td>3-4 min facial · 5-10 min corporal</td></tr>
+  </table>
+  <div class="key" style="font-size:calc(var(--u)*1.3);padding:calc(var(--u)*.7) calc(var(--u)*1.4)">Manda siempre la <b>ficha técnica</b> del equipo y del cosmético. El nivel correcto es un <b>hormigueo agradable, nunca dolor</b>.</div>
+</section>
+
+<!-- 6 Mapa -->
+<section class="slide" data-title="Mapa de las técnicas">
+  <div class="top"><div><div class="eyebrow">Mapa de las técnicas</div><h2>Cada técnica aprovecha un tipo de efecto</h2></div><span class="ra">RA2 · f)</span></div>
+  <p style="font-size:calc(var(--u)*1.6)">Eso decide qué electrodo es el activo y si se cambia o no la polaridad. Toca cada técnica.</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1.15fr;gap:calc(var(--u)*1.6)" class="grow">
+    <div class="mapcol"><div class="maph p-plus" style="background:#f6e0e2">Efectos <b>polares</b><br><small>bajo cada electrodo</small></div>
+      <button class="mapb" data-m="ion">Iontoforesis</button><button class="mapb" data-m="des">Desincrustación</button><button class="mapb" data-m="ele">Electrólisis</button><button class="mapb" data-m="ana">Anaforesis</button></div>
+    <div class="mapcol"><div class="maph" style="background:#fff2cc;color:#7a5a10">Efectos <b>interpolares</b><br><small>entre los electrodos</small></div>
+      <button class="mapb" data-m="ese">Galvanización esencial</button><button class="mapb" data-m="com">Galvanización combinada</button><button class="mapb" data-m="bano">Baño galvánico</button></div>
+    <div class="card" id="map-info" style="font-size:calc(var(--u)*1.5)"><p style="color:var(--muted)">Elige una técnica.</p></div>
+  </div>
+</section>
+
+<!-- 7 Iontoforesis -->
+<section class="slide" data-title="Iontoforesis">
+  <div class="top"><div><div class="eyebrow">6.1 · Técnicas polares</div><h2>Iontoforesis (ionización)</h2></div><span class="ra">RA2 · d), f)</span></div>
+  <p style="font-size:calc(var(--u)*1.6)">Hace penetrar <b>principios activos</b> a través de la piel por repulsión iónica. Muy indicada en tratamientos de <b>hidratación y reafirmación</b>. Se nota un hormigueo con pequeños pinchacitos, nunca molesto.</p>
+  <div class="row"><div class="seg" id="io-zone"><button data-v="f" class="sel">Facial</button><button data-v="c">Corporal</button></div></div>
+  <div style="display:grid;grid-template-columns:1fr 1.2fr;gap:calc(var(--u)*2)" class="grow">
+    <svg id="io-pic" viewBox="0 0 400 260" style="width:100%;height:100%" aria-label="Colocación de electrodos"></svg>
+    <div style="display:flex;flex-direction:column;gap:var(--u);font-size:calc(var(--u)*1.45)" id="io-txt"></div>
+  </div>
+</section>
+
+<!-- 8 Penetración -->
+<section class="slide" data-title="Vías de penetración">
+  <div class="top"><div><div class="eyebrow">6.1 · Iontoforesis</div><h2>¿Por dónde entran los activos?</h2></div><span class="ra">RA2 · c), f)</span></div>
+  <div style="display:grid;grid-template-columns:1.35fr 1fr;gap:calc(var(--u)*2)" class="grow">
+    <div style="display:flex;flex-direction:column;gap:var(--u)">
+      <p style="font-size:calc(var(--u)*1.5)">Toca cada vía de entrada en el corte de piel.</p>
+      <svg viewBox="0 0 520 300" style="width:100%" aria-label="Corte de piel con tres vías de entrada">
+        <rect x="0" y="40" width="520" height="260" fill="#f3d2bd"/>
+        <rect x="0" y="40" width="520" height="60" fill="#e6b79b"/>
+        <text x="8" y="60" font-size="12" fill="#7a5a48">epidermis</text><text x="8" y="130" font-size="12" fill="#7a5a48">dermis</text>
+        <g class="route" data-r="sud" tabindex="0" role="button" aria-label="Glándula sudorípara">
+          <path d="M100 40 L100 200" stroke="#3b5bdb" stroke-width="7" fill="none"/>
+          <path d="M100 200 q-25 15 0 30 q25 15 0 30 q-25 -15 0 -30" stroke="#3b5bdb" stroke-width="7" fill="none"/>
+          <circle cx="100" cy="20" r="16" fill="#3b5bdb"/><text x="100" y="25" text-anchor="middle" fill="#fff" font-weight="700">1</text></g>
+        <g class="route" data-r="fol" tabindex="0" role="button" aria-label="Folículo piloso">
+          <path d="M260 40 L260 230" stroke="#8a5a2b" stroke-width="16" fill="none" stroke-linecap="round"/>
+          <path d="M260 0 L260 230" stroke="#3a2a1a" stroke-width="4" fill="none"/>
+          <ellipse cx="282" cy="120" rx="16" ry="11" fill="#f5d36b"/>
+          <circle cx="300" cy="20" r="16" fill="#8a5a2b"/><text x="300" y="25" text-anchor="middle" fill="#fff" font-weight="700">2</text></g>
+        <g class="route" data-r="epi" tabindex="0" role="button" aria-label="A través de la epidermis">
+          <path d="M420 30 L420 95" stroke="#b8860b" stroke-width="5" stroke-dasharray="6 5" fill="none"/>
+          <rect x="370" y="62" width="100" height="14" fill="#b8860b" opacity=".45"/>
+          <circle cx="420" cy="20" r="16" fill="#b8860b"/><text x="420" y="25" text-anchor="middle" fill="#fff" font-weight="700">3</text></g>
+      </svg>
+      <div class="card" id="route-info" style="font-size:calc(var(--u)*1.5);min-height:calc(var(--u)*8)"><p style="color:var(--muted)">Elige 1, 2 o 3.</p></div>
+    </div>
+    <div class="key" style="font-size:calc(var(--u)*1.5)"><strong class="t">Factores que influyen en la penetración</strong>
+      <ul><li>Tipo y estado de la piel.</li><li>Tamaño y carga del ion.</li><li>Concentración de iones en la solución y ausencia de iones no deseados.</li><li>Tamaño del electrodo.</li><li>Intensidad de la corriente.</li><li>Tiempo de aplicación.</li></ul></div>
+  </div>
+</section>
+
+<!-- 9 Fabricante -->
+<section class="slide" data-title="Qué indica el fabricante">
+  <div class="top"><div><div class="eyebrow">6.1 · Iontoforesis</div><h2>¿Qué debe indicar el fabricante del activo?</h2></div><span class="ra">RA3 · d)</span></div>
+  <p style="font-size:calc(var(--u)*1.6)">Marca solo la información que el fabricante <b>debe</b> darte para aplicar el producto con iontoforesis. Después pulsa «Comprobar».</p>
+  <div class="checkgrid grow" id="fab"></div>
+  <div class="row"><button class="btn" id="fab-check">Comprobar</button><button class="btn ghost" id="fab-reset">↺ Reiniciar</button><span id="fab-res" style="font-weight:700;font-size:calc(var(--u)*1.5)"></span></div>
+</section>
+
+<!-- 10 Protocolo -->
+<section class="slide" data-title="Protocolo de iontoforesis">
+  <div class="top"><div><div class="eyebrow">6.1 · Iontoforesis</div><h2>Ordena el protocolo</h2></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:calc(var(--u)*.4)"><span class="ra">RA4 · b), i)</span><button class="btn ghost" id="pr-reset" style="font-size:calc(var(--u)*1.1);padding:calc(var(--u)*.35) var(--u)">↺ Reiniciar</button></div></div>
+  <p style="font-size:calc(var(--u)*1.5)">Toca los pasos <b>en el orden correcto</b>. Si te equivocas, verás una pista.</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:calc(var(--u)*2)" class="grow">
+    <div id="pr-pool" style="display:flex;flex-direction:column;gap:calc(var(--u)*.6)"></div>
+    <div class="card" style="padding:calc(var(--u)*1.2)"><ol id="pr-done" style="margin:0;padding-left:calc(var(--u)*2);font-size:calc(var(--u)*1.35);line-height:1.35"></ol><div id="pr-msg" class="fb" style="display:none;font-size:calc(var(--u)*1.35);margin-top:calc(var(--u)*.8)"></div></div>
+  </div>
+</section>
+
+<!-- 11 Desincrustación -->
+<section class="slide" data-title="Desincrustación: fundamento">
+  <div class="top"><div><div class="eyebrow">6.2 · Técnicas polares</div><h2>Desincrustación: la corriente que hace jabón</h2></div><span class="ra">RA2 · c), d)</span></div>
+  <p style="font-size:calc(var(--u)*1.6)">Retira el exceso de grasa de la piel. En el <b>cátodo</b> se forma <b>hidróxido sódico (NaOH)</b>, que reacciona con el sebo y forma <b>jabón</b>: es la <button class="term" data-t="sapo">saponificación</button>.</p>
+  <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:calc(var(--u)*2)" class="grow">
+    <div style="display:flex;flex-direction:column;gap:var(--u)">
+      <svg id="sapo" viewBox="0 0 520 250" style="width:100%" aria-label="Animación de la saponificación bajo el cátodo">
+        <rect x="0" y="0" width="520" height="250" fill="#eef5f8"/>
+        <rect x="0" y="150" width="520" height="100" fill="#f3d2bd"/><rect x="0" y="150" width="520" height="14" fill="#e6b79b"/>
+        <rect x="150" y="30" width="220" height="38" rx="10" fill="#2b3a67"/><text x="260" y="56" text-anchor="middle" fill="#fff" font-weight="700" font-size="18">Cátodo (−)</text>
+        <rect x="150" y="68" width="220" height="22" fill="#fff" opacity=".85"/><text x="376" y="84" font-size="11" fill="#555">esponja con solución</text>
+        <g id="sapo-parts"></g>
+        <text x="8" y="240" font-size="12" fill="#7a5a48">piel</text>
+      </svg>
+      <div class="row"><button class="btn" id="sapo-go">⚡ Aplicar cátodo</button><button class="btn ghost" id="sapo-wash">💧 Retirar con agua</button><button class="btn ghost" id="sapo-reset">↺</button></div>
+      <p id="sapo-msg" style="font-size:calc(var(--u)*1.4);font-weight:500"></p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:var(--u);font-size:calc(var(--u)*1.45)">
+      <p style="text-align:center"><span class="eq" style="font-size:calc(var(--u)*1.6);background:#fff;border:1px solid var(--line)">grasa + NaOH → jabón + glicerina</span></p>
+      <div class="card"><b>Activo: negativo (cátodo)</b>, con esponja o gasa empapada en solución desincrustante: <b>bicarbonato sódico al 10 %</b> (la más habitual), cloruro sódico al 10 % o carbonato sódico al 5 %.</div>
+      <div class="card"><b>Pasivo: positivo</b> y grande (barra o placa).</div>
+      <div class="card"><b>Duración:</b> 3-4 min en facial · 5-10 min en corporal.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 12 Desincrustación a quién -->
+<section class="slide" data-title="Desincrustación: a quién y cuándo">
+  <div class="top"><div><div class="eyebrow">6.2 · Desincrustación</div><h2>¿A quién y cada cuánto?</h2></div><span class="ra">RA4 · a), e)</span></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:calc(var(--u)*2)" class="grow">
+    <div class="card" style="display:flex;flex-direction:column;gap:calc(var(--u)*2.4);justify-content:center">
+      <div><div style="font-weight:700;font-size:calc(var(--u)*1.6);margin-bottom:calc(var(--u)*.6)">1. Tipo de piel</div>
+        <div class="seg" id="ds-skin" style="flex-wrap:wrap"><button data-v="grasa" class="sel">Grasa</button><button data-v="mixta">Mixta</button><button data-v="seca">Seca</button><button data-v="sens">Sensible</button></div></div>
+      <div><label style="display:flex;justify-content:space-between;font-weight:700;font-size:calc(var(--u)*1.45)">2. Días desde la última desincrustación <span id="ds-dv"></span></label>
+        <input type="range" id="ds-days" min="1" max="40" value="20"></div>
+      <div id="ds-bar" style="height:calc(var(--u)*2.2);border-radius:var(--u);display:flex;overflow:hidden;font-size:var(--u);font-weight:700;color:#fff">
+        <div style="flex:14;background:#b3261e;display:flex;align-items:center;justify-content:center">1-14: demasiado pronto</div>
+        <div style="flex:6;background:#2e7d4f;display:flex;align-items:center;justify-content:center">15-20</div>
+        <div style="flex:20;background:#7a9a86;display:flex;align-items:center;justify-content:center">más de 20</div></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:var(--u)">
+      <div class="fb" id="ds-res" style="font-size:calc(var(--u)*1.8);padding:calc(var(--u)*1.6)"></div>
+      <div class="key" style="font-size:calc(var(--u)*1.6)"><strong class="t">Recuerda</strong>Indicada en pieles <b>grasas o seborreicas y gruesas</b>, en zonas con muchas glándulas sebáceas (cara, parte alta del tórax, hombros y espalda). <b>Antes:</b> limpieza, exfoliación y vapor. <b>Después:</b> ionización, masaje y mascarilla específica.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 13 Electrólisis y anaforesis -->
+<section class="slide" data-title="Electrólisis y anaforesis">
+  <div class="top"><div><div class="eyebrow">6.3 · 6.4 · Técnicas polares</div><h2>Electrólisis y anaforesis</h2></div><span class="ra">RA2 · d), f)</span></div>
+  <p style="font-size:calc(var(--u)*1.55)">La <b>electrólisis</b> produce una quemadura química en el folículo para destruir la <button class="term" data-t="papila">papila</button> del pelo. Usa una aguja muy fina (0,055, 0,070 o 0,100 mm) que concentra mucho la corriente. ¿Qué polaridad elegirías para la aguja?</p>
+  <div class="row"><div class="seg" id="el-pol"><button data-v="-" class="sel">Aguja negativa (−)</button><button data-v="+">Aguja positiva (+)</button></div></div>
+  <div style="display:grid;grid-template-columns:.8fr 1.2fr 1fr;gap:calc(var(--u)*1.6)" class="grow">
+    <svg viewBox="0 0 200 240" style="width:100%;height:100%" aria-label="Aguja en el folículo">
+      <rect x="0" y="40" width="200" height="200" fill="#f3d2bd"/><rect x="0" y="40" width="200" height="30" fill="#e6b79b"/>
+      <path d="M100 0 L100 200" stroke="#3a2a1a" stroke-width="5"/>
+      <ellipse cx="100" cy="205" rx="18" ry="14" fill="#c97b6b"/>
+      <path d="M86 0 L86 196" stroke="#9aa3ad" stroke-width="3"/>
+      <circle id="el-burn" cx="100" cy="200" r="26" fill="#2b3a67" opacity=".35"/>
+      <text x="150" y="215" font-size="11" fill="#6b645a">papila</text>
+    </svg>
+    <div class="card" id="el-info" style="font-size:calc(var(--u)*1.45)"></div>
+    <div class="card" style="font-size:calc(var(--u)*1.45);background:var(--plus-soft)"><h3 style="color:var(--plus)">Anaforesis</h3><p style="margin-top:calc(var(--u)*.6)">Equilibra el pH de la piel tratada con el cátodo (por ejemplo, después de la electrólisis). Activo: <b>polo positivo (ánodo)</b>; de ahí su nombre. Ayuda a recuperar el <button class="term" data-t="ph">pH</button> y calma la irritación.</p><p style="margin-top:calc(var(--u)*.6);color:var(--muted);font-size:calc(var(--u)*1.2)">Las dos técnicas se estudian a fondo en 2.º curso.</p></div>
+  </div>
+</section>
+
+<!-- 14 Reto polaridad -->
+<section class="slide" data-title="Reto: ¿qué electrodo activo?">
+  <div class="top"><div><div class="eyebrow">Técnicas · Repaso</div><h2>Reto: ¿qué electrodo es el activo?</h2></div><div style="text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:calc(var(--u)*.4)"><span class="ra">RA2 · f), g)</span><div class="row"><b id="rp-score" style="font-size:calc(var(--u)*1.4)"></b><button class="btn ghost" id="rp-reset" style="font-size:calc(var(--u)*1.1);padding:calc(var(--u)*.35) var(--u)">↺ Reiniciar</button></div></div></div>
+  <div class="cls grow" id="rp" style="grid-template-columns:repeat(2,1fr);gap:calc(var(--u)*1.4);align-content:center"></div>
+  <style>#rp .row button,#ad .row button{font-size:calc(var(--u)*1.5);padding:calc(var(--u)*.7)}#rp small,#ad small{font-size:calc(var(--u)*1.45)}</style>
+</section>
+
+<!-- 15 Galvanización esencial -->
+<section class="slide" data-title="Galvanización esencial">
+  <div class="top"><div><div class="eyebrow">7.1 · Técnicas interpolares</div><h2>Galvanización esencial</h2></div><span class="ra">RA2 · d), f)</span></div>
+  <p style="font-size:calc(var(--u)*1.6)">Busca <b>solo los efectos interpolares</b>. Como los polares también aparecen y pueden irritar, <b>siempre se programan cambios de polaridad</b>. Toca cada indicación:</p>
+  <div class="cls grow" id="ind" style="grid-template-columns:repeat(2,1fr);gap:calc(var(--u)*1.2);align-content:start"></div>
+  <div class="key" style="font-size:calc(var(--u)*1.6)"><strong class="t">¿Por qué cambiar la polaridad?</strong>Bajo cada electrodo siguen apareciendo los efectos polares (reacción ácida o alcalina). Al invertir, se reparten y la piel no se irrita.</div>
+</section>
+
+<!-- 16 Facial: línea de tiempo -->
+<section class="slide" data-title="Galvanización facial">
+  <div class="top"><div><div class="eyebrow">7.1 · Galvanización facial</div><h2>Galvanización facial: los cambios de polaridad</h2></div><span class="ra">RA2 · g) · RA4 · e)</span></div>
+  <div style="display:grid;grid-template-columns:1fr 1.5fr;gap:calc(var(--u)*2)" class="grow">
+    <div class="card" style="font-size:calc(var(--u)*1.55);display:flex;flex-direction:column;gap:var(--u);justify-content:center">
+      <p><b>Máscara</b> de tejido elástico humedecida con suero fisiológico, con un electrodo flexible a cada lado de la cara. Sin arrugas y sin tocar la piel directamente.</p>
+      <p>Los dos <b>positivos</b> van a la máscara y los <b>negativos</b> a una <b>placa pasiva</b> (unos 200 cm²) con esponja húmeda, en la espalda o cerca.</p>
+      <p><b>Tiempo:</b> 7-15 min. Cuanto peor conduce la piel (gruesa, mal vascularizada, desvitalizada), más tiempo.</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:calc(var(--u)*1.1)">
+      <div class="row" style="gap:calc(var(--u)*2)">
+        <div class="seg" id="tl-ses"><button data-v="1" class="sel">Primeras sesiones</button><button data-v="2">Sesiones siguientes</button></div>
+        <div style="flex:1;min-width:calc(var(--u)*16)"><label style="display:flex;justify-content:space-between;font-weight:700;font-size:calc(var(--u)*1.3)">Duración <span id="tl-dv"></span></label><input type="range" id="tl-dur" min="7" max="15" value="12"></div>
+      </div>
+      <div style="position:relative">
+        <div id="tl-bar" class="tl"></div>
+        <div id="tl-cur" class="tlcur"></div>
+      </div>
+      <div id="tl-axis" style="display:flex;justify-content:space-between;font-size:calc(var(--u)*1.05);color:var(--muted)"></div>
+      <div class="row"><button class="btn" id="tl-play">▶ Reproducir sesión</button><span id="tl-now" style="font-weight:700;font-size:calc(var(--u)*1.4)"></span></div>
+      <div class="fb" id="tl-msg" style="font-size:calc(var(--u)*1.35);background:#fff8e6">En las primeras sesiones se suele hacer <b>una sola inversión</b>; en las siguientes, cada <b>4-5 minutos</b> aproximadamente.</div>
+      <p style="font-size:calc(var(--u)*1.05);color:var(--muted)">Ejemplo orientativo: el reparto exacto lo marcan el equipo y la piel de la clienta.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 17 Esencial vs combinada -->
+<section class="slide" data-title="Esencial o combinada">
+  <div class="top"><div><div class="eyebrow">7.2 · Galvanización combinada</div><h2>¿Programo cambios de polaridad?</h2></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:calc(var(--u)*.4)"><span class="ra">RA2 · c), f)</span><button class="btn ghost" id="sc-reset" style="font-size:calc(var(--u)*1.1);padding:calc(var(--u)*.35) var(--u)">↺ Reiniciar</button></div></div>
+  <div class="grid2">
+    <div class="card" style="font-size:calc(var(--u)*1.4)"><h3>Galvanización esencial</h3><p style="margin-top:calc(var(--u)*.4)">Solo efectos interpolares → <b>con cambios de polaridad</b>, para que los efectos polares no irriten.</p></div>
+    <div class="card" style="font-size:calc(var(--u)*1.4)"><h3>Galvanización combinada</h3><p style="margin-top:calc(var(--u)*.4)">Es una <b>iontoforesis con la máscara</b>: la polaridad la marca el producto → <b>sin cambios</b>, o el producto dejaría de penetrar.</p></div>
+  </div>
+  <p style="font-size:calc(var(--u)*1.5);font-weight:700">Decide en cada caso:</p>
+  <div id="sc" style="display:flex;flex-direction:column;gap:calc(var(--u)*.55)" class="grow"></div>
+</section>
+
+<!-- 18 Corporal y baño -->
+<section class="slide" data-title="Corporal y baño galvánico">
+  <div class="top"><div><div class="eyebrow">7.1 · 7.3 · Técnicas interpolares</div><h2>Galvanización corporal y baño galvánico</h2></div><span class="ra">RA2 · d), g)</span></div>
+  <div style="display:grid;grid-template-columns:auto 1fr 1fr;gap:calc(var(--u)*2)" class="grow">
+    <svg viewBox="0 0 200 360" style="height:62cqh;width:auto" aria-label="Pierna con vendas y bandas">
+      <path d="M70 10 h60 q8 0 8 10 l-6 180 q-2 30 2 70 l4 60 q2 20 -18 20 h-40 q-18 0 -14 -20 l6 -60 q4 -40 2 -70 l-6 -180 q0 -10 8 -10z" fill="#f3d2bd" stroke="#e6b79b" stroke-width="3"/>
+      <rect x="58" y="40" width="84" height="250" rx="10" fill="#fff" opacity=".45"/>
+      <rect x="60" y="60" width="80" height="30" rx="6" fill="#c8323c"/><text x="100" y="81" text-anchor="middle" fill="#fff" font-weight="700" font-size="18">+</text>
+      <rect x="66" y="250" width="68" height="28" rx="6" fill="#2b3a67"/><text x="100" y="270" text-anchor="middle" fill="#fff" font-weight="700" font-size="18">−</text>
+      <text x="100" y="170" text-anchor="middle" font-size="11" fill="#6b645a">vendas</text><text x="100" y="183" text-anchor="middle" font-size="11" fill="#6b645a">húmedas</text>
+    </svg>
+    <div class="card" style="font-size:calc(var(--u)*1.4);display:flex;flex-direction:column;gap:calc(var(--u)*.7)">
+      <h3>Galvanización corporal</h3>
+      <p><b>Vendas elásticas</b> humedecidas y, encima, <b>bandas conductoras</b> bien ajustadas: una arriba y otra (o dos) abajo, <b>sin que se toquen</b>.</p>
+      <p><b>Positivo arriba</b> y <b>negativo abajo</b> → efecto relajante. Las inversiones se hacen igual que en facial.</p>
+      <p><b>Unos 30 min</b>, máximo orientativo de <b>5 mA</b>. Nunca debe sentir dolor.</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:var(--u)">
+      <div class="card" style="font-size:calc(var(--u)*1.4)"><h3>Baño galvánico</h3><p style="margin-top:calc(var(--u)*.4)"><b>El agua actúa como electrodo.</b> Los electrodos se aíslan para que no toquen la piel.</p></div>
+      <div class="seg" id="bt"><button data-v="g" class="sel">Baño general</button><button data-v="l">Baño local</button></div>
+      <div class="card" id="bt-info" style="font-size:calc(var(--u)*1.4);flex:1"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 19 Antes y después -->
+<section class="slide" data-title="Antes y después">
+  <div class="top"><div><div class="eyebrow">7.4 · Combinación con otras técnicas</div><h2>¿Antes o después de la galvanización?</h2></div><div style="text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:calc(var(--u)*.4)"><span class="ra">RA4 · i), j)</span><div class="row"><b id="ad-score" style="font-size:calc(var(--u)*1.4)"></b><button class="btn ghost" id="ad-reset" style="font-size:calc(var(--u)*1.1);padding:calc(var(--u)*.35) var(--u)">↺ Reiniciar</button></div></div></div>
+  <p style="font-size:calc(var(--u)*1.55)">Decide en qué momento del tratamiento va cada técnica.</p>
+  <div class="cls grow" id="ad" style="grid-template-columns:repeat(3,1fr);gap:calc(var(--u)*1.3);align-content:center"></div>
+</section>
+
+<!-- 20 Test -->
+<section class="slide" data-title="Autoevaluación">
+  <div class="top"><div><div class="eyebrow">Autoevaluación</div><h2>¿Lo has entendido?</h2></div><span class="ra">RA2 · d), f), g) · RA3 · b), d) · RA4 · e)</span></div>
+  <div class="qbar"><i id="q-bar"></i></div>
+  <div id="q-area" class="grow"></div>
+  <div class="row" style="justify-content:space-between">
+    <span id="q-count" style="color:var(--muted);font-size:calc(var(--u)*1.4)"></span>
+    <button class="btn" id="q-next" style="display:none">Siguiente →</button>
+  </div>
+</section>
+
+<!-- 21 Cierre -->
+<section class="slide dark" data-title="Ideas clave">
+  <div class="eyebrow">Para llevar</div>
+  <h2 style="font-size:calc(var(--u)*3.4)">Ideas clave de los apartados 4-7</h2>
+  <div class="key grow" style="font-size:calc(var(--u)*1.9);display:flex;flex-direction:column;justify-content:center;padding:calc(var(--u)*2) calc(var(--u)*3)">
+    <ul>
+      <li>Cables: <b>rojo = positivo</b>, <b>negro = negativo</b>. Mandos <b>a cero</b> antes de cualquier maniobra.</li>
+      <li>Manda la <b>ficha técnica</b>; el nivel correcto es un <b>hormigueo agradable</b>.</li>
+      <li><b>Iontoforesis:</b> el activo lleva la <b>polaridad del producto</b>; máximo 30 min.</li>
+      <li><b>Desincrustación:</b> activo <b>negativo</b>; repetir cada <b>15-20 días</b>.</li>
+      <li><b>Electrólisis:</b> aguja <b>negativa</b>. <b>Anaforesis:</b> activo <b>positivo</b>.</li>
+      <li><b>Galvanización esencial:</b> <b>con cambios</b> de polaridad. <b>Combinada:</b> polaridad del producto, <b>sin cambios</b>.</li>
+      <li>Facial <b>7-15 min</b>; corporal <b>unos 30 min</b>.</li>
+    </ul>
+  </div>
+</section>
+
+</div></div>
+
+<div class="nav">
+  <button class="navb" id="prev" aria-label="Diapositiva anterior">←</button>
+  <div class="dots" id="dots"></div>
+  <span id="counter" aria-live="polite"></span>
+  <button class="navb" id="next" aria-label="Diapositiva siguiente">→</button>
+</div>
+
+<div id="pop" role="tooltip"></div>
+
+<script>
+/* ---------- Navegación ---------- */
+const slides=[...document.querySelectorAll('.slide')];let cur=0;
+const dots=document.getElementById('dots');
+slides.forEach((s,i)=>{const d=document.createElement('button');d.className='dot';d.title=(i+1)+'. '+s.dataset.title;d.setAttribute('aria-label',d.title);d.onclick=()=>go(i);dots.appendChild(d)});
+const pop=document.getElementById('pop');let popFor=null;
+function hidePop(){pop.style.display='none';popFor=null}
+function go(i){
+  cur=Math.max(0,Math.min(slides.length-1,i));
+  slides.forEach((s,k)=>s.classList.toggle('active',k===cur));
+  [...dots.children].forEach((d,k)=>d.classList.toggle('on',k===cur));
+  document.getElementById('counter').textContent=(cur+1)+' / '+slides.length;
+  document.getElementById('prev').disabled=cur===0;document.getElementById('next').disabled=cur===slides.length-1;
+  hidePop();try{history.replaceState(null,'','#diapo-'+(cur+1))}catch(e){}
+}
+document.getElementById('prev').onclick=()=>go(cur-1);
+document.getElementById('next').onclick=()=>go(cur+1);
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT')return;
+  if(e.key==='ArrowRight'||e.key==='PageDown'){go(cur+1);e.preventDefault()}
+  if(e.key==='ArrowLeft'||e.key==='PageUp'){go(cur-1);e.preventDefault()}
+  if(e.key==='Home')go(0);if(e.key==='End')go(slides.length-1);
+});
+
+/* ---------- Glosario ---------- */
+const GL={
+ ejemplo:["Palabra del glosario","Toca cualquier palabra subrayada para ver qué significa."],
+ sapo:["Saponificación","Reacción de una grasa con un álcali (como el hidróxido sódico) que forma jabón y glicerina."],
+ papila:["Papila","Parte del fondo del folículo que nutre el pelo y le permite crecer."],
+ ph:["pH","Escala que indica si algo es ácido (pH bajo), neutro (7) o alcalino (pH alto). La piel es ligeramente ácida."],
+ bipolar:["Producto bipolar","Cosmético con iones de los dos signos que sirven: se reparte el tiempo en dos mitades, una con cada polaridad."],
+ atona:["Piel átona","Piel sin vitalidad, de aspecto apagado."],
+ hiperh:["Hiperhidrosis","Sudoración excesiva."],
+ trofica:["Acción trófica","Mejora la nutrición de los tejidos."]
+};
+document.querySelectorAll('.term').forEach(b=>b.addEventListener('click',e=>{
+  e.stopPropagation();if(popFor===b){hidePop();return}
+  const d=GL[b.dataset.t];pop.innerHTML='<b>'+d[0]+'</b><br>'+d[1];pop.style.display='block';
+  const r=b.getBoundingClientRect(),w=Math.min(320,innerWidth-24);
+  pop.style.left=Math.min(Math.max(12,r.left),innerWidth-12-w)+'px';pop.style.top=(r.bottom+8)+'px';
+  const ph=pop.offsetHeight;if(r.bottom+8+ph>innerHeight-10)pop.style.top=(r.top-ph-8)+'px';popFor=b;
+}));
+document.addEventListener('click',hidePop);
+const NS='http://www.w3.org/2000/svg';
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function segInit(id,cb){const s=document.getElementById(id);s.querySelectorAll('button').forEach(b=>b.onclick=()=>{s.querySelectorAll('button').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');cb(b.dataset.v)})}
+function keyAct(el,f){el.addEventListener('click',f);el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();f()}})}
+
+/* ---------- 2 Equipo ---------- */
+const DEV={
+ power:['Interruptor de encendido','Enciende y apaga el equipo. Antes de encenderlo, comprueba que <b>todos los mandos están a cero</b>.'],
+ meter:['Miliamperímetro','Indica la intensidad que está pasando, en <b>miliamperios (mA)</b>.'],
+ inv:['Inversor o conmutador de polaridad','Cambia el sentido de la corriente: lo que era + pasa a ser −. Solo se acciona con los mandos <b>a cero</b>.'],
+ micro:['Conversor a microgalvánica','Reduce la intensidad a la <b>décima parte</b>. Para zonas pequeñas, pieles finas y electrodos pequeños (rodillo, seta, bola, punta).'],
+ rheo:['Regulador de intensidad (reóstato)','Hay uno para cada salida. Sube o baja la intensidad: siempre <b>lenta y progresivamente</b>.'],
+ plugs:['Clavijas','Varias parejas (positiva y negativa) para tratar zonas amplias. Cable <b style="color:#c8323c">rojo = positivo (ánodo)</b>; cable <b>negro = negativo (cátodo)</b>.']
+};
+document.querySelectorAll('.hot').forEach(h=>h.onclick=()=>{document.querySelectorAll('.hot').forEach(x=>x.classList.toggle('sel',x.dataset.p===h.dataset.p));const d=DEV[h.dataset.p];document.getElementById('dev-info').innerHTML='<h3>'+d[0]+'</h3><p style="margin-top:calc(var(--u)*.6)">'+d[1]+'</p>'});
+
+/* ---------- 3 Simulador seguridad ---------- */
+const CHK=[['on0','Encender con los mandos a cero'],['conn0','Conectar los electrodos a cero'],['slow','Subir la intensidad poco a poco'],['inv0','Usar el inversor a cero'],['end0','Bajar a cero antes de desconectar']];
+let S;
+function sReset(){S={power:false,conn:false,mA:0,micro:false,done:{},last:0};
+  document.getElementById('s-rheo').value=0;document.getElementById('s-checks').innerHTML=CHK.map(c=>`<li data-k="${c[0]}">${c[1]}</li>`).join('');
+  sMsg('Enciende el equipo para empezar.','');sDraw()}
+function sMsg(t,kind){const m=document.getElementById('s-msg');m.innerHTML=t;m.style.background=kind==='bad'?'#b3261e':kind==='good'?'#2e7d4f':'#3a342e'}
+function sOk(k){S.done[k]=1;document.querySelector(`#s-checks li[data-k="${k}"]`).classList.add('ok');document.getElementById('s-score').textContent=Object.keys(S.done).length+' / '+CHK.length;
+  if(Object.keys(S.done).length===CHK.length)sMsg('🎉 ¡Sesión completa y segura! Has seguido todas las buenas prácticas.','good')}
+function sDraw(){const r=document.getElementById('s-rheo');r.disabled=!(S.power&&S.conn);
+  const shown=S.micro?S.mA/10:S.mA;document.getElementById('s-lcd').textContent=S.power?shown.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})+' mA':'— — mA';
+  document.getElementById('s-val').textContent=S.mA.toLocaleString('es-ES')+' mA'+(S.micro?' → '+(S.mA/10).toLocaleString('es-ES')+' mA (÷10)':'');
+  const p=document.getElementById('s-power');p.textContent=S.power?'⏻ Apagar':'⏻ Encender';p.classList.toggle('on',S.power);
+  const c=document.getElementById('s-conn');c.textContent=S.conn?'🔌 Desconectar electrodos':'🔌 Conectar electrodos';c.classList.toggle('on',S.conn);
+  document.getElementById('s-micro').textContent='µ Microgalvánica: '+(S.micro?'SÍ':'NO');document.getElementById('s-micro').classList.toggle('on',S.micro);
+  if(!Object.keys(S.done).length)document.getElementById('s-score').textContent='0 / '+CHK.length}
+const zeroErr='⛔ <b>¡Primero baja la intensidad a cero!</b> Antes de cualquier maniobra (conectar, desconectar, inversor...) todos los mandos deben estar a cero.';
+document.getElementById('s-power').onclick=()=>{
+  if(!S.power){S.power=true;if(S.mA===0){sOk('on0');sMsg('✔ Equipo encendido con los mandos a cero. Ahora conecta los electrodos.','good')}}
+  else{if(S.mA>0){sMsg(zeroErr,'bad');return}S.power=false;sMsg('Equipo apagado.','')}
+  sDraw()};
+document.getElementById('s-conn').onclick=()=>{
+  if(!S.power){sMsg('Primero enciende el equipo.','');return}
+  if(S.mA>0){sMsg(zeroErr,'bad');return}
+  if(!S.conn){S.conn=true;sOk('conn0');sMsg('✔ Electrodos conectados a cero. Sube la intensidad con el reóstato, poco a poco, preguntando a la clienta cómo lo nota.','good')}
+  else{S.conn=false;if(S.had){sOk('end0')}sMsg('Electrodos desconectados con la intensidad a cero. ✔','good')}
+  sDraw()};
+document.getElementById('s-inv').onclick=()=>{
+  if(!S.power){sMsg('Primero enciende el equipo.','');return}
+  if(S.mA>0){sMsg(zeroErr,'bad');return}
+  sOk('inv0');sMsg('✔ Polaridad invertida con los mandos a cero. Ahora puedes volver a subir la intensidad poco a poco.','good');sDraw()};
+document.getElementById('s-micro').onclick=()=>{
+  if(S.mA>0){sMsg(zeroErr,'bad');return}
+  S.micro=!S.micro;sMsg(S.micro?'Microgalvánica activada: la intensidad real será la décima parte. Útil con electrodos pequeños y pieles finas.':'Microgalvánica desactivada.','');sDraw()};
+document.getElementById('s-rheo').addEventListener('input',e=>{
+  const v=+e.target.value,jump=v-S.mA;S.mA=v;
+  if(jump>1){S.had=true;S.slowOk=0;sMsg('⚠ <b>Demasiado rápido.</b> Sube la intensidad <b>lenta y progresivamente</b>, de medio en medio, preguntando a la clienta.','bad')}
+  else if(jump>0){S.had=true;S.slowOk=(S.slowOk||0)+1;if(S.slowOk>=3&&!S.done.slow)sOk('slow');sMsg('Subiendo poco a poco... Pregunta: «¿Notas un hormigueo agradable?». Nunca debe doler.','')}
+  else if(v===0){sMsg('Intensidad a cero. Ya puedes hacer cualquier maniobra.','good')}
+  else sMsg('Bajando la intensidad lentamente.','');
+  sDraw()});
+document.getElementById('s-reset').onclick=sReset;sReset();
+
+/* ---------- 4 Accesorios ---------- */
+const ACC=[['Cables','Rojo = positivo (ánodo); negro = negativo (cátodo).'],['Electrodos metálicos manuales','Rodillo liso (iontoforesis), con tela, con pinchos (estimula la piel), seta, bola o punta (desincrustación). Van en un portaelectrodos.'],['Placas metálicas','Recubiertas con funda o esponja humedecida en solución conductora. El metal no toca la piel.'],['Máscara facial','Tejido elástico absorbente con electrodos flexibles integrados (galvanización facial).'],['Vendas y bandas conductoras','Para galvanización corporal; se humedecen en solución conductora.'],['Barra metálica','Electrodo pasivo que el cliente sujeta con la mano.'],['Bandas elásticas de sujeción','Fijan las placas con cierre adhesivo.'],['Esponjas','Para desincrustación.']];
+document.getElementById('flips').innerHTML=ACC.map(a=>`<button class="flip" aria-label="${a[0]}"><div class="in"><div class="f">${a[0]}</div><div class="b">${a[1]}</div></div></button>`).join('');
+document.querySelectorAll('.flip').forEach(f=>f.onclick=()=>f.classList.toggle('on'));
+
+/* ---------- 5 Modo repaso de tablas ---------- */
+document.querySelectorAll('table.rv').forEach(tb=>{
+  const sl=tb.closest('.slide');const cells=[...tb.querySelectorAll('tr')].slice(1).flatMap(r=>[...r.querySelectorAll('td')].slice(1)).filter(c=>c.textContent.trim()!=='—');
+  const mode=sl.querySelector('.rv-mode'),all=sl.querySelector('.rv-all'),cnt=sl.querySelector('.rv-count');let on=false;
+  const upd=()=>{cnt.textContent=on?cells.filter(c=>!c.classList.contains('hid')).length+' / '+cells.length:''};
+  function set(v){on=v;cells.forEach(c=>{c.classList.toggle('hid',on);c.classList.remove('shown');c.tabIndex=on?0:-1});mode.textContent=on?'↺ Salir del repaso':'🙈 Modo repaso';all.style.display=on?'inline-block':'none';upd()}
+  cells.forEach(c=>keyAct(c,()=>{if(!c.classList.contains('hid'))return;c.classList.remove('hid');c.classList.add('shown');upd()}));
+  mode.onclick=()=>set(!on);all.onclick=()=>{cells.forEach(c=>{if(c.classList.contains('hid')){c.classList.remove('hid');c.classList.add('shown')}});upd()};
+});
+
+/* ---------- 6 Mapa ---------- */
+const MAP={
+ ion:['Iontoforesis','Repulsión de iones (polar)','El de la <b>polaridad del producto</b>','No (salvo productos bipolares: mitad del tiempo con cada polaridad)'],
+ des:['Desincrustación','Reacción alcalina: forma jabón con el sebo (polar)','<b>Negativo (cátodo)</b>','No'],
+ ele:['Electrólisis','Quemadura química en el folículo (polar)','<b>Negativo</b>: la aguja','No'],
+ ana:['Anaforesis','Equilibra el pH tras usar el cátodo (polar)','<b>Positivo (ánodo)</b>','No'],
+ ese:['Galvanización esencial','Solo efectos interpolares','Positivos a la máscara (facial) o positivo arriba (corporal)','<b>Sí, siempre</b>, para que los efectos polares no irriten'],
+ com:['Galvanización combinada','Interpolares + penetración de un producto','El de la <b>polaridad del producto</b>','<b>No</b>: el producto dejaría de penetrar'],
+ bano:['Baño galvánico','Interpolares; el agua hace de electrodo','Los electrodos se aíslan para que no toquen la piel','—']
+};
+document.querySelectorAll('.mapb').forEach(b=>b.onclick=()=>{document.querySelectorAll('.mapb').forEach(x=>x.classList.toggle('sel',x===b));const m=MAP[b.dataset.m];
+  document.getElementById('map-info').innerHTML=`<h3>${m[0]}</h3><p style="margin-top:calc(var(--u)*.8)"><b>Efecto que aprovecha:</b><br>${m[1]}</p><p style="margin-top:calc(var(--u)*.8)"><b>Electrodo activo:</b><br>${m[2]}</p><p style="margin-top:calc(var(--u)*.8)"><b>¿Cambios de polaridad?</b><br>${m[3]}</p>`});
+
+/* ---------- 7 Iontoforesis facial/corporal ---------- */
+function ioZone(v){
+  const pic=document.getElementById('io-pic'),txt=document.getElementById('io-txt');
+  if(v==='f'){
+    pic.innerHTML=`<ellipse cx="150" cy="120" rx="80" ry="100" fill="#f3d2bd" stroke="#e6b79b" stroke-width="3"/>
+      <path d="M150 200 L150 245" stroke="#e6b79b" stroke-width="40"/>
+      <circle cx="125" cy="140" r="11" fill="#c8323c"/><line x1="125" y1="140" x2="40" y2="40" stroke="#c8323c" stroke-width="4"/><text x="18" y="30" font-size="13" font-weight="700" fill="#c8323c">activo (bola)</text>
+      <rect x="275" y="120" width="26" height="110" rx="10" fill="#9aa3ad"/><line x1="288" y1="120" x2="288" y2="60" stroke="#23201c" stroke-width="4"/><text x="250" y="50" font-size="13" font-weight="700" fill="#23201c">pasivo (barra)</text>
+      <text x="200" y="250" text-anchor="middle" font-size="12" fill="#6b645a">ejemplo con producto «ion positivo»</text>`;
+    txt.innerHTML=`<div class="card"><b>Activo:</b> misma polaridad que los iones del cosmético. Se aplica el producto uniformemente y se pasan uno o dos electrodos metálicos.</div>
+      <div class="card"><b>Electrodos pequeños</b> (rodillo, seta, bola, punta) → <b>microgalvánica</b>. Si el electrodo toca la piel, <b>mantenlo siempre en movimiento</b>.</div>
+      <div class="card"><b>Pasivo:</b> polaridad contraria. Barra que sujeta el cliente o placa cerca (brazo, hombro por detrás), humedecida con suero fisiológico.</div>`}
+  else{
+    pic.innerHTML=`<rect x="60" y="20" width="180" height="230" rx="40" fill="#f3d2bd" stroke="#e6b79b" stroke-width="3"/>
+      <rect x="30" y="90" width="40" height="110" rx="6" fill="#c8323c"/><rect x="230" y="90" width="40" height="110" rx="6" fill="#2b3a67"/>
+      <text x="50" y="80" text-anchor="middle" font-size="13" font-weight="700" fill="#c8323c">activo</text><text x="250" y="80" text-anchor="middle" font-size="13" font-weight="700" fill="#2b3a67">pasivo</text>
+      <path d="M75 145 H225" stroke="#b8860b" stroke-width="3" stroke-dasharray="7 5"/><text x="150" y="138" text-anchor="middle" font-size="11" fill="#7a5a10">enfrentados</text>
+      <text x="150" y="250" text-anchor="middle" font-size="12" fill="#6b645a">vista de un muslo desde arriba</text>`;
+    txt.innerHTML=`<div class="card"><b>Activo y pasivo iguales:</b> placas rectangulares con esponja, <b>en paralelo y enfrentados</b>.</div>
+      <div class="card">El activo se empapa con el <b>producto</b> y el pasivo con <b>suero fisiológico</b>.</div>
+      <div class="card">Hay placas circulares para zonas como el pecho. Los productos <button class="term" data-t="bipolar">bipolares</button> se aplican la mitad del tiempo con cada polaridad.</div>`;
+    txt.querySelectorAll('.term').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();const d=GL[b.dataset.t];pop.innerHTML='<b>'+d[0]+'</b><br>'+d[1];pop.style.display='block';const r=b.getBoundingClientRect();pop.style.left=Math.min(r.left,innerWidth-340)+'px';pop.style.top=(r.bottom+8)+'px';popFor=b}))}
+}
+segInit('io-zone',ioZone);ioZone('f');
+
+/* ---------- 8 Vías ---------- */
+const RT={sud:['1 · Glándulas sudoríparas','<b>La vía principal para los iones</b>, porque son lo que menos resistencia eléctrica tiene en la piel.'],
+ fol:['2 · Folículo piloso','Muy buena vía para los activos, pero <b>peor para los iones</b>, porque el sebo aísla la corriente.'],
+ epi:['3 · A través de la epidermis','<b>Más difícil</b>, por la barrera de las capas lúcida y granulosa.']};
+document.querySelectorAll('.route').forEach(g=>keyAct(g,()=>{document.querySelectorAll('.route').forEach(x=>x.classList.toggle('sel',x===g));const d=RT[g.dataset.r];document.getElementById('route-info').innerHTML='<h3>'+d[0]+'</h3><p style="margin-top:calc(var(--u)*.5)">'+d[1]+'</p>'}));
+
+/* ---------- 9 Fabricante ---------- */
+const FAB=[['Polaridad con la que se aplica y si hay que cambiarla',1],['Intensidad mínima eficaz y máxima tolerable (mA/cm²)',1],['Tiempo de aplicación',1],['Tipo y superficie de los electrodos',1],['Contraindicaciones propias del producto',1],['Marca del equipo con el que hay que usarlo',0],['Color del cable que debe usarse',0],['Número de sesiones que necesita cada clienta',0],['Temperatura de la cabina',0]];
+function fabBuild(){const g=document.getElementById('fab');g.innerHTML='';document.getElementById('fab-res').textContent='';
+  shuffle(FAB.slice()).forEach(([t,ok])=>{const b=document.createElement('button');b.className='ck';b.dataset.ok=ok;b.textContent=t;b.onclick=()=>{if(g.dataset.done)return;b.classList.toggle('on')};g.appendChild(b)});delete g.dataset.done}
+document.getElementById('fab-check').onclick=()=>{const g=document.getElementById('fab');g.dataset.done=1;let hit=0,err=0;
+  g.querySelectorAll('.ck').forEach(b=>{const on=b.classList.contains('on'),ok=b.dataset.ok==='1';
+    if(on&&ok){b.classList.add('good');hit++}else if(on&&!ok){b.classList.add('bad');err++}else if(!on&&ok)b.classList.add('miss')});
+  document.getElementById('fab-res').innerHTML=`${hit} de 5 correctas · ${err} sobrantes`+(hit===5&&!err?' 🎉':' · Las de borde discontinuo te faltaban')};
+document.getElementById('fab-reset').onclick=fabBuild;fabBuild();
+
+/* ---------- 10 Protocolo ---------- */
+const PR=['Coloca al cliente cómodo, normalmente en camilla.','Limpia bien la zona (un peeling o exfoliación mejora la penetración).','Comprueba que todos los mandos están a cero.','Prepara los electrodos: activo con el producto y pasivo con solución conductora, en su funda.','Coloca el activo sobre la zona y el pasivo a unos centímetros, con contacto uniforme.','Sube la intensidad lenta y progresivamente, preguntando cómo lo nota.','Al terminar, baja la intensidad lentamente hasta cero antes de retirar los electrodos.','Lava bien electrodos, placas y fundas para eliminar restos de iones.'];
+const PRH=['Empieza por la persona: ¿cómo debe estar colocada?','Antes de nada, la piel tiene que estar preparada.','Antes de tocar electrodos o cables, revisa el equipo.','Con el equipo a cero, ya puedes preparar los electrodos.','Electrodos preparados: ¿dónde van?','Todo colocado: ahora sí, la corriente.','La sesión termina: ¿qué haces antes de retirar nada?','Último paso: la higiene.'];
+let prN=0;
+function prBuild(){prN=0;const pool=document.getElementById('pr-pool');pool.innerHTML='';document.getElementById('pr-done').innerHTML='';document.getElementById('pr-msg').style.display='none';
+  shuffle(PR.map((t,i)=>[t,i])).forEach(([t,i])=>{const b=document.createElement('button');b.className='step';b.textContent=t;b.onclick=()=>{
+    const m=document.getElementById('pr-msg');
+    if(i===prN){prN++;b.remove();const li=document.createElement('li');li.textContent=t;li.style.marginBottom='calc(var(--u)*.4)';document.getElementById('pr-done').appendChild(li);
+      m.style.display=prN===PR.length?'block':'none';m.className='fb good';m.innerHTML='🎉 ¡Protocolo completo y en orden!'}
+    else{b.classList.remove('shake');void b.offsetWidth;b.classList.add('shake');m.style.display='block';m.className='fb bad';m.innerHTML='Ese no toca todavía. Pista: '+PRH[prN]}};pool.appendChild(b)})}
+document.getElementById('pr-reset').onclick=prBuild;prBuild();
+
+/* ---------- 11 Saponificación ---------- */
+const sp=document.getElementById('sapo-parts');let spState=0,spTimer=null;
+function spInit(){spState=0;cancelAnimationFrame(spTimer);sp.innerHTML='';
+  for(let i=0;i<9;i++){const c=document.createElementNS(NS,'ellipse');c.setAttribute('cx',170+i*23);c.setAttribute('cy',140);c.setAttribute('rx',10);c.setAttribute('ry',7);c.setAttribute('fill','#f2c94c');c.setAttribute('class','sebo');sp.appendChild(c)}
+  document.getElementById('sapo-msg').textContent='Gotas de sebo (amarillo) sobre la piel. Aplica el cátodo.'}
+function spGo(){if(spState)return;spState=1;
+  for(let i=0;i<10;i++){const t=document.createElementNS(NS,'text');t.textContent='NaOH';t.setAttribute('x',165+i*21);t.setAttribute('y',100);t.setAttribute('font-size','10');t.setAttribute('font-weight','700');t.setAttribute('fill','#2b3a67');t.setAttribute('class','naoh');sp.appendChild(t)}
+  let f=0;(function a(){f++;sp.querySelectorAll('.naoh').forEach(t=>t.setAttribute('y',Math.min(132,100+f*.5)));
+    if(f>70){sp.querySelectorAll('.sebo').forEach(c=>{c.setAttribute('fill','#ffffff');c.setAttribute('stroke','#7fb3d5');c.setAttribute('stroke-width','2');c.setAttribute('rx','11');c.setAttribute('ry','11')});sp.querySelectorAll('.naoh').forEach(t=>t.remove());
+      document.getElementById('sapo-msg').innerHTML='El NaOH del cátodo ha convertido el sebo en <b>jabón</b> (burbujas). Ahora retíralo con agua.';spState=2;return}
+    spTimer=requestAnimationFrame(a)})();
+  document.getElementById('sapo-msg').textContent='En el cátodo se forma hidróxido sódico (NaOH), que baja hacia el sebo...'}
+function spWash(){if(spState!==2){document.getElementById('sapo-msg').textContent=spState?'Espera a que se forme el jabón.':'Primero aplica el cátodo: el sebo solo no se va con agua.';return}
+  spState=3;let f=0;(function a(){f++;sp.querySelectorAll('.sebo').forEach((c,i)=>{c.setAttribute('cy',140-f*1.4-(i%3)*f*.3);c.setAttribute('opacity',Math.max(0,1-f/70))});if(f<75)spTimer=requestAnimationFrame(a);else document.getElementById('sapo-msg').innerHTML='✔ Poro limpio: el jabón se retira fácilmente con agua.'})()}
+document.getElementById('sapo-go').onclick=spGo;document.getElementById('sapo-wash').onclick=spWash;document.getElementById('sapo-reset').onclick=spInit;spInit();
+
+/* ---------- 12 Desincrustación a quién ---------- */
+let dsSkin='grasa';
+function dsUpd(){const d=+document.getElementById('ds-days').value;document.getElementById('ds-dv').textContent=d+(d===1?' día':' días');
+  const r=document.getElementById('ds-res');let t,ok;
+  if(dsSkin==='seca'||dsSkin==='sens'){ok=false;t=`<b>✘ No aplicar.</b> Las pieles ${dsSkin==='seca'?'secas':'sensibles'} son una contraindicación propia de la desincrustación.`}
+  else if(d<15){ok=false;t=`<b>✘ Demasiado pronto.</b> Han pasado ${d} días. Si se abusa, la piel se irrita y produce más sebo: <b>efecto rebote</b>. Intervalo: 15-20 días.`}
+  else{ok=true;t=dsSkin==='mixta'?`<b>✔ Sí, pero solo en las zonas grasas.</b> En pieles mixtas no se trata toda la cara.`:`<b>✔ Se puede aplicar.</b> Piel grasa y ${d} días desde la última sesión (intervalo recomendado: 15-20 días).`}
+  r.className='fb '+(ok?'good':'bad');r.innerHTML=t+'<br><span style="font-size:calc(var(--u)*1.25)">Efectos secundarios posibles: enrojecimiento o irritación.</span>'}
+segInit('ds-skin',v=>{dsSkin=v;dsUpd()});document.getElementById('ds-days').addEventListener('input',dsUpd);dsUpd();
+
+/* ---------- 13 Electrólisis ---------- */
+function elUpd(v){const b=document.getElementById('el-burn'),i=document.getElementById('el-info');
+  if(v==='-'){b.setAttribute('fill','#2b3a67');i.innerHTML='<h3 style="color:var(--minus)">✔ Aguja negativa: quemadura alcalina</h3><p style="margin-top:calc(var(--u)*.6)">Es la que se usa. Igual de eficaz que la ácida y <b>menos traumática</b>: es blanda y <b>no se pega</b>, así que la aguja se retira con facilidad.</p><p style="margin-top:calc(var(--u)*.6)">Efecto secundario: vasodilatación y excitación nerviosa. Pasivo: positivo y grande. Cada pelo se destruye en décimas de segundo.</p>'}
+  else{b.setAttribute('fill','#c8323c');i.innerHTML='<h3 style="color:var(--plus)">✘ Aguja positiva: quemadura ácida</h3><p style="margin-top:calc(var(--u)*.6)">Es <b>dura y costrosa</b> y deja <b>cicatriz visible</b>. Por eso no se usa en electrólisis.</p>'}}
+segInit('el-pol',elUpd);elUpd('-');
+
+/* ---------- 14 Reto polaridad ---------- */
+const RP=[['Iontoforesis con un hidratante «ion negativo»','-','El activo lleva la polaridad del producto: negativo.'],['Desincrustación','-','El NaOH que forma el jabón aparece en el cátodo.'],['Electrólisis (la aguja)','-','Quemadura alcalina: blanda y sin cicatriz.'],['Anaforesis','+','Su nombre viene del ánodo: equilibra el pH.'],['Galvanización combinada con un producto «ion positivo»','+','Manda el producto: positivo, y sin cambios.'],['Iontoforesis con un reafirmante «ion positivo»','+','Misma polaridad que los iones del producto.']];
+function rpBuild(){const box=document.getElementById('rp');box.innerHTML='';let ok=0,tot=0;const upd=()=>document.getElementById('rp-score').textContent='Aciertos: '+ok+' / '+tot;
+  shuffle(RP.slice()).forEach(([t,a,why])=>{const d=document.createElement('div');d.className='cl';d.style.fontSize='calc(var(--u)*1.85)';d.style.padding='calc(var(--u)*1.6)';
+    d.innerHTML=`<p style="margin-bottom:var(--u)">${t}</p><div class="row"><button class="a" data-v="+">Activo +</button><button class="c" data-v="-">Activo −</button></div>`;
+    d.querySelectorAll('button').forEach(b=>b.onclick=()=>{if(d.dataset.done)return;d.dataset.done=1;tot++;const r=b.dataset.v===a;if(r)ok++;d.classList.add(r?'right':'wrong');
+      d.querySelector('.row').outerHTML=`<small>${r?'✔ ':'✘ Es <b>'+(a==='+'?'positivo (ánodo)':'negativo (cátodo)')+'</b>. '}${why}</small>`;upd()});box.appendChild(d)});upd()}
+document.getElementById('rp-reset').onclick=rpBuild;rpBuild();
+
+/* ---------- 15 Indicaciones ---------- */
+/* bigger cards */
+const IND=[['Pieles átonas, desvitalizadas y deshidratadas','Por su <button class="term" data-t="trofica">acción trófica</button>. <i>Átona</i>: sin vitalidad, de aspecto apagado.'],['Envejecimiento cutáneo','Al hidratar, mejora el aspecto de las arrugas pequeñas.'],['Celulitis','Mejora la circulación local. Actúa sobre la calidad de la piel (dermis), <b>no sobre los depósitos de grasa</b>.'],['Flacidez y trastornos circulatorios','Tonificación de piel y músculo; mejora la circulación.'],['Hiperhidrosis','Sudoración excesiva.'],['Preparar la piel','Para aplicar cosméticos u otras corrientes y activar el metabolismo.']];
+const ind=document.getElementById('ind');
+IND.forEach(([t,d])=>{const b=document.createElement('div');b.className='cl';b.tabIndex=0;b.setAttribute('role','button');b.style.cursor='pointer';b.style.padding='calc(var(--u)*1.5) calc(var(--u)*1.6)';
+  b.innerHTML=`<p style="margin:0;font-weight:700;font-size:calc(var(--u)*1.9)">${t} <span style="float:right;color:var(--accent)">＋</span></p><small style="display:none;margin-top:calc(var(--u)*.6);font-size:calc(var(--u)*1.6);line-height:1.4">${d}</small>`;
+  keyAct(b,()=>{const s=b.querySelector('small'),o=s.style.display==='none';ind.querySelectorAll('.cl').forEach(x=>{x.querySelector('small').style.display='none';x.querySelector('span').textContent='＋'});s.style.display=o?'block':'none';b.querySelector('span').textContent=o?'－':'＋'});ind.appendChild(b)});
+ind.querySelectorAll('.term').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();const d=GL[b.dataset.t];pop.innerHTML='<b>'+d[0]+'</b><br>'+d[1];pop.style.display='block';const r=b.getBoundingClientRect();pop.style.left=Math.min(r.left,innerWidth-340)+'px';pop.style.top=(r.bottom+8)+'px';popFor=b}));
+
+/* ---------- 16 Línea de tiempo ---------- */
+let tlSes='1',tlSegs=[],tlAnim=null;
+function tlBuild(){cancelAnimationFrame(tlAnim);const dur=+document.getElementById('tl-dur').value;document.getElementById('tl-dv').textContent=dur+' min';
+  let cuts=[];if(tlSes==='1')cuts=[dur/2];else{const n=Math.max(1,Math.round(dur/4.5)-0);const step=dur/(n+1);for(let k=1;k<=n;k++)cuts.push(step*k)}
+  const pts=[0,...cuts,dur];tlSegs=[];const bar=document.getElementById('tl-bar');bar.innerHTML='';
+  for(let k=0;k<pts.length-1;k++){const pos=k%2===0;tlSegs.push([pts[k],pts[k+1],pos]);const d=document.createElement('div');d.style.flex=pts[k+1]-pts[k];d.style.background=pos?'#c8323c':'#2b3a67';d.innerHTML=`máscara ${pos?'+':'−'}<br><span style="font-weight:400;font-size:var(--u)">${(pts[k+1]-pts[k]).toLocaleString('es-ES',{maximumFractionDigits:1})} min</span>`;d.style.flexDirection='column';d.style.lineHeight='1.15';bar.appendChild(d)}
+  document.getElementById('tl-axis').innerHTML=pts.map(p=>`<span>${p.toLocaleString('es-ES',{maximumFractionDigits:1})}′</span>`).join('');
+  document.getElementById('tl-cur').style.display='none';document.getElementById('tl-now').textContent=`${cuts.length} ${cuts.length===1?'inversión':'inversiones'}`;
+  document.getElementById('tl-msg').innerHTML=tlSes==='1'?'En las <b>primeras sesiones</b> se suele hacer <b>una sola inversión</b>.':'En las <b>sesiones siguientes</b> se aumentan: un cambio cada <b>4-5 minutos</b> aproximadamente.'}
+function tlPlay(){cancelAnimationFrame(tlAnim);const dur=+document.getElementById('tl-dur').value,c=document.getElementById('tl-cur');c.style.display='block';const t0=performance.now(),total=dur*1000;let lastSeg=0;
+  (function a(now){const p=Math.min(1,(now-t0)/total),m=p*dur;c.style.left=`calc(${p*100}% - calc(var(--u)*.2))`;
+    const si=tlSegs.findIndex(s=>m>=s[0]&&m<=s[1]);document.getElementById('tl-now').textContent=`Minuto ${Math.floor(m)} · máscara ${tlSegs[Math.max(0,si)][2]?'+':'−'}`;
+    if(si>lastSeg){lastSeg=si;document.getElementById('tl-msg').innerHTML='⇄ <b>¡Inversión!</b> En este momento puede notarse más «picoteo»: si molesta, baja un poco la intensidad.'}
+    if(p<1)tlAnim=requestAnimationFrame(a);else{document.getElementById('tl-msg').innerHTML='Fin de la sesión: baja la intensidad a cero y limpia y esteriliza la máscara.'}})(t0)}
+segInit('tl-ses',v=>{tlSes=v;tlBuild()});document.getElementById('tl-dur').addEventListener('input',tlBuild);document.getElementById('tl-play').onclick=tlPlay;tlBuild();
+
+/* ---------- 17 Escenarios ---------- */
+const SC=[['Galvanización esencial facial en una piel átona.','si','En la esencial siempre se programan cambios, para que los efectos polares no irriten.'],['Galvanización combinada con un sérum «ion positivo».','no','Si se invirtiera, en la segunda mitad el producto dejaría de penetrar.'],['Galvanización corporal de piernas con vendas, sin producto.','si','Es galvanización esencial: las inversiones se hacen igual que en facial.'],['Galvanización combinada con un antiarrugas «ion negativo».','no','La polaridad la marca el producto y se mantiene toda la sesión.']];
+function scBuild(){const box=document.getElementById('sc');box.innerHTML='';
+  SC.forEach(([t,a,why])=>{const d=document.createElement('div');d.className='scn';d.innerHTML=`<span>${t}</span><button data-v="si">Sí, con cambios</button><button data-v="no">No, sin cambios</button>`;
+    d.querySelectorAll('button').forEach(b=>b.onclick=()=>{const r=b.dataset.v===a;d.classList.add(r?'right':'wrong');d.querySelectorAll('button').forEach(x=>x.remove());d.querySelector('span').innerHTML=`${t}<br><small>${r?'✔':'✘ '+(a==='si'?'Sí hay cambios.':'No hay cambios.')} ${why}</small>`});box.appendChild(d)})}
+document.getElementById('sc-reset').onclick=scBuild;scBuild();
+
+/* ---------- 18 Baño ---------- */
+function btUpd(v){document.getElementById('bt-info').innerHTML=v==='g'?'<b>Cómo:</b> bañera con electrodos a los lados.<br><br><b>Para qué:</b> estímulo circulatorio, trofismo muscular y relajación (también se usa en procesos reumáticos).':'<b>Cómo:</b> cubetas para manos o pies.<br><br><b>Para qué:</b> <b>hiperhidrosis</b> (sudor excesivo) de manos y pies.'}
+segInit('bt',btUpd);btUpd('g');
+
+/* ---------- 19 Antes y después ---------- */
+const AD=[['Limpieza','a'],['Exfoliación','a'],['Ultrasonidos (tratamiento anticelulítico)','a'],['Gimnasia pasiva (falta de tono)','a'],['Masaje con cosméticos específicos','d'],['Drenaje linfático','d'],['Presoterapia','d']];
+function adBuild(){const box=document.getElementById('ad');box.innerHTML='';let ok=0,tot=0;const upd=()=>document.getElementById('ad-score').textContent='Aciertos: '+ok+' / '+tot;
+  shuffle(AD.slice()).forEach(([t,a])=>{const d=document.createElement('div');d.className='cl';d.style.fontSize='calc(var(--u)*1.9)';d.style.padding='calc(var(--u)*1.5)';d.innerHTML=`<p style="margin-bottom:var(--u)">${t}</p><div class="row"><button class="a" data-v="a" style="color:var(--ink)">Antes</button><button class="c" data-v="d" style="color:var(--ink)">Después</button></div>`;
+    d.querySelectorAll('button').forEach(b=>b.onclick=()=>{if(d.dataset.done)return;d.dataset.done=1;tot++;const r=b.dataset.v===a;if(r)ok++;d.classList.add(r?'right':'wrong');
+      d.querySelector('.row').outerHTML=`<small>${r?'✔ ':'✘ '}Va <b>${a==='a'?'antes':'después'}</b>. ${a==='a'?'Prepara la piel o el músculo.':'Facilita la reabsorción de líquidos o completa el tratamiento.'}</small>`;upd()});box.appendChild(d)});upd()}
+document.getElementById('ad-reset').onclick=adBuild;adBuild();
+
+/* ---------- 20 Test ---------- */
+const Q=[
+ ["¿Qué hace el conversor a microgalvánica?",["Duplica la intensidad","Reduce la intensidad a la décima parte","Cambia la polaridad","Apaga el equipo"],1,"Reduce la intensidad a la décima parte, para zonas pequeñas o pieles finas."],
+ ["¿Cuándo hay que poner los mandos a cero?",["Solo al apagar el equipo","Antes de cualquier maniobra: conectar, mover el inversor...","Solo si la clienta se queja","Nunca, el equipo lo hace solo"],1,"Antes de cualquier maniobra se bajan todos los mandos a cero."],
+ ["¿Cuál es la intensidad correcta en una sesión?",["Siempre 10 mA","La máxima que permita el equipo","La que dé un hormigueo agradable, sin dolor, según la ficha técnica","La mínima posible, aunque no se note nada"],2,"No existe una intensidad óptima: manda la ficha técnica y la sensibilidad del cliente."],
+ ["En iontoforesis, ¿cuál es la vía principal de entrada de los iones?",["El folículo piloso","Las glándulas sudoríparas","La capa córnea","Las glándulas sebáceas"],1,"Las glándulas sudoríparas son lo que menos resistencia eléctrica tiene en la piel."],
+ ["¿Cuánto tiempo como máximo dura una iontoforesis?",["5 minutos","15 minutos","30 minutos","60 minutos"],2,"Máximo 30 minutos, para evitar demasiada vasodilatación y que se seque la gasa o esponja."],
+ ["En la desincrustación, el electrodo activo es…",["El positivo, porque forma ácido","El negativo, porque forma NaOH que convierte el sebo en jabón","Cualquiera de los dos","El que indique el cosmético"],1,"En el cátodo se forma NaOH, que saponifica el sebo."],
+ ["¿Cada cuánto se puede repetir una desincrustación?",["Cada 2-3 días","Cada semana","Cada 15-20 días","Una vez al año"],2,"Cada 15-20 días; si se abusa, la piel se irrita y produce más sebo (efecto rebote)."],
+ ["¿Por qué en electrólisis la aguja es negativa?",["Porque la quemadura alcalina es blanda, no se pega y no deja cicatriz visible","Porque así no se nota nada","Porque la quemadura ácida es más eficaz","Porque lo marca el cosmético"],0,"La quemadura alcalina es igual de eficaz y menos traumática que la ácida."],
+ ["En la galvanización combinada…",["Siempre se programan cambios de polaridad","No se programan cambios: el producto dejaría de penetrar","Se usa sin máscara","No se usa producto"],1,"La polaridad la marca el producto y se mantiene toda la sesión."],
+ ["¿Cuánto dura una galvanización facial?",["1-2 min","7-15 min","30-40 min","60 min"],1,"Entre 7 y 15 minutos; más tiempo cuanto peor conduce la piel."]
+];
+let qi=0,qok=0,order=[];
+function qStart(){order=shuffle([...Q.keys()]);qi=0;qok=0;qShow()}
+function qShow(){
+  const area=document.getElementById('q-area'),nx=document.getElementById('q-next');
+  document.getElementById('q-bar').style.width=(qi/Q.length*100)+'%';
+  if(qi>=Q.length){
+    const msg=qok>=9?'¡Excelente! Dominas el equipo y las técnicas.':qok>=7?'¡Muy bien! Repasa las que fallaste.':qok>=5?'Vas por buen camino. Vuelve a las diapositivas de las preguntas falladas.':'Repasa la presentación y vuelve a intentarlo.';
+    area.innerHTML=`<div style="text-align:center;padding-top:calc(var(--u)*4)"><div class="num-big" style="font-size:calc(var(--u)*5)">${qok} / ${Q.length}</div><p style="margin:var(--u) 0 calc(var(--u)*2)">${msg}</p><button class="btn" id="q-again">↺ Repetir</button></div>`;
+    document.getElementById('q-again').onclick=qStart;nx.style.display='none';document.getElementById('q-count').textContent='';return;
+  }
+  const [q,opts,ans,why]=Q[order[qi]];
+  area.innerHTML=`<h3 style="margin:var(--u) 0 calc(var(--u)*.6);font-size:calc(var(--u)*2.3)">${q}</h3>`+opts.map((o,i)=>`<button class="opt" data-i="${i}">${o}</button>`).join('')+'<div class="fb" style="display:none;margin-top:calc(var(--u)*.8);font-size:calc(var(--u)*1.6)"></div>';
+  document.getElementById('q-count').textContent=`Pregunta ${qi+1} de ${Q.length} · Aciertos: ${qok}`;nx.style.display='none';
+  area.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.i;area.querySelectorAll('.opt').forEach(x=>x.disabled=true);
+    area.querySelector(`.opt[data-i="${ans}"]`).classList.add('right');
+    const fb=area.querySelector('.fb');fb.style.display='block';
+    if(i===ans){qok++;fb.className='fb good';fb.innerHTML='✔ <b>Correcto.</b> '+why}else{b.classList.add('wrong');fb.className='fb bad';fb.innerHTML='✘ <b>No es correcto.</b> '+why}
+    document.getElementById('q-count').textContent=`Pregunta ${qi+1} de ${Q.length} · Aciertos: ${qok}`;
+    nx.style.display='inline-block';nx.textContent=qi===Q.length-1?'Ver resultado →':'Siguiente →';
+  });
+}
+document.getElementById('q-next').onclick=()=>{qi++;qShow()};qStart();
+
+/* ---------- Arranque ---------- */
+const m0=location.hash.match(/^#diapo-(\d+)$/);go(m0?(+m0[1]-1):0);
+
+</script>
+</body>
+</html>
